@@ -45,15 +45,16 @@ const updateContact = async (req, res) => {
   res.status(200).json(update);
 };
 
-const updateFavorite =async(req,res)=>{
-  const{contactId} = req.params
-  const result = await Contact.findByIdAndUpdate(contactId, req.body,{new: true});
-  if(!result){
+const updateStatusContact = async (req, res) => {
+  const { contactId } = req.params;
+  const result = await Contact.findByIdAndUpdate({_id: contactId}, req.body, {
+    new: true
+  });
+  if (!result) {
     throw HttpError(404, "Not found");
   }
-  result.status(200).json(result)
-}
-
+  res.status(200).json(result);
+};
 
 module.exports = {
   allContacts: ctrlWrapper(allContacts),
@@ -61,5 +62,5 @@ module.exports = {
   addContact: ctrlWrapper(addContact),
   removeContact: ctrlWrapper(removeContact),
   updateContact: ctrlWrapper(updateContact),
-  updateFavorite: ctrlWrapper(updateFavorite),
+  updateStatusContact: ctrlWrapper(updateStatusContact),
 };
