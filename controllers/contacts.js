@@ -3,13 +3,27 @@ const { HttpError, ctrlWrapper } = require("../helpers");
 
 const allContacts = async (req, res) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 1 } = req.query;
+  const { page = 1, limit, favorite } = req.query;
   const skip = (page - 1) * limit;
-  const allContact = await Contact.find({ owner }, "-createdAt -updatedAt", {
-    skip,
-    limit,
-  }).populate("owner", "name email");
-  res.status(200).json(allContact);
+
+  if (favorite === "true") {
+    const allContactFavorite = await Contact.find(
+      { owner },
+      "-createdAt -updatedAt",
+      {
+        skip,
+        limit,
+      }
+    ).populate("owner", "name email");
+    const reselt = allContactFavorite.filter((contact) => contact.favorite);
+    res.status(200).json(reselt);
+  } else {
+    const allContact = await Contact.find({ owner }, "-createdAt -updatedAt", {
+      skip,
+      limit,
+    }).populate("owner", "name email");
+    res.status(200).json(allContact);
+  }
 };
 
 const contactById = async (req, res) => {
@@ -24,7 +38,7 @@ const contactById = async (req, res) => {
 
 const addContact = async (req, res) => {
   const { _id: owner } = req.user;
-  const addContact = await Contact.create({ ...req.body, owner });
+  const addContact = await Contact.create({ ...req.body, owner});
   res.status(201).json(addContact);
 };
 
@@ -39,9 +53,6 @@ const removeContact = async (req, res) => {
 };
 
 const updateContact = async (req, res) => {
-  if (Object.keys(req.body).length === 0) {
-    throw HttpError(400, "missing fields");
-  }
   const update = await Contact.findByIdAndUpdate(
     { _id: req.params.contactId },
     req.body,

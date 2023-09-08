@@ -3,6 +3,12 @@ const { User } = require("../models/user");
 const { HttpError, ctrlWrapper } = require("../helpers");
 const jwt = require("jsonwebtoken");
 const { SECRET_KEY } = process.env;
+const gravatar = require("gravatar");
+const path = require("path");
+const Jimp = require("jimp");
+const fs = require("fs").promises;
+
+const avatarDir = path.join(__dirname, "../", "public", "avatars");
 
 const register = async (req, res) => {
   const { email, password } = req.body;
@@ -17,8 +23,17 @@ const register = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({ ...req.body, password: hashPassword });
-  res.status(201).json({ name: newUser.name, email: newUser.email });
+  const avatarURL = gravatar.url(email);
+
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    avatarURL,
+  });
+
+  res.status(201).json({
+    user: { email: newUser.email, subscription: newUser.subscription },
+  });
 };
 
 const login = async (req, res) => {
@@ -36,9 +51,12 @@ const login = async (req, res) => {
     id: user._id,
   };
 
-  const token = jwt.sign(payload, SECRET_KEY, { expiresIn: "23h" });
-  await User.findByIdAndUpdate(user._id, { token });
-  res.json({ token });
+  const token = jwt.sign(payload, SECRET_KEY);
+  const resart = await User.findByIdAndUpdate(user._id, { token });
+  res.json({
+    token,
+    user: { email: resart.email, subscription: resart.subscription },
+  });
 };
 
 const getCurrent = async (req, res) => {
@@ -49,7 +67,39 @@ const getCurrent = async (req, res) => {
 const logout = async (req, res) => {
   const { _id } = req.user;
   await User.findByIdAndUpdate(_id, { token: "" });
-  res.status(204);
+  res.status(204).json({});
+};
+
+const updateStatusUser = async (req, res) => {
+  const { _id } = req.user;
+  const result = await User.findByIdAndUpdate(_id, req.body, {
+    new: true,
+  });
+  if (!result) {
+    throw HttpError(404, "Not found");
+  }
+  res.status(200).json(result);
+};
+
+const getAvatar = async (req, res) => {
+  const { _id } = req.user;
+  const { path: tempUpload, originalname } = req.file;
+
+  const fileName = `${_id}_${originalname}`;
+  const resultUpload = path.join(avatarDir, fileName);
+
+  try {
+    const image = await Jimp.read(tempUpload);
+    await image.resize(250, 250).writeAsync(resultUpload);
+
+    const avatarURL = path.join("avatars", fileName);
+    await User.findByIdAndUpdate(_id, { avatarURL });
+    await fs.unlink(tempUpload);
+    res.status(200).json({ avatarURL });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "An error occurred" });
+  }
 };
 
 module.exports = {
@@ -57,4 +107,6 @@ module.exports = {
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
+  updateStatusUser: ctrlWrapper(updateStatusUser),
+  getAvatar: ctrlWrapper(getAvatar),
 };
