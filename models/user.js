@@ -24,6 +24,14 @@ const userSchema = new Schema(
       type: String,
       required: true,
     },
+    verify: {
+      type: Boolean,
+      default: false,
+    },
+    verificationToken: {
+      type: String,
+      required: [true, "Verify token is required"],
+    },
   },
   { versionKey: false, timeseries: true }
 );
@@ -58,17 +66,28 @@ const loginSchema = Joi.object({
 });
 
 const addShemaSubscription = Joi.object({
-  subscription: Joi.string().valid("starter", "pro", "business").required().messages({
-    "string.base": `subscription should be a type of 'text'`,
-    "string.empty": `subscription cannot be an empty field`,
-    "any.required": `subscription is a required field`,
-  }),
+  subscription: Joi.string()
+    .valid("starter", "pro", "business")
+    .required()
+    .messages({
+      "string.base": `subscription should be a type of 'text'`,
+      "string.empty": `subscription cannot be an empty field`,
+      "any.required": `subscription is a required field`,
+    }),
 });
 
+const emailSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.base": `email should be a type of 'text'`,
+    "string.empty": `email cannot be an empty field`,
+    "any.required": `email is a required field`,
+  }),
+});
 const schemas = {
   registerSchema,
   loginSchema,
   addShemaSubscription,
+  emailSchema,
 };
 
 const User = model("user", userSchema);
