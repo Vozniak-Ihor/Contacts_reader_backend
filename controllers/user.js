@@ -31,6 +31,13 @@ const register = async (req, res) => {
     verificationToken,
   });
 
+  const payload = { id: newUser._id };
+  const token = jwt.sign(payload, SECRET_KEY);
+  const resart = await User.findByIdAndUpdate(
+    newUser._id,
+    { token },
+    { returnDocument: "after" }
+  );
   const varificationEmail = {
     to: email,
     subject: "Verify your email",
@@ -40,7 +47,8 @@ const register = async (req, res) => {
   await sendEmail(varificationEmail);
 
   res.status(201).json({
-    user: { email: newUser.email, subscription: newUser.subscription },
+    token,
+    user: { email: resart.email, subscription: resart.subscription },
   });
 };
 

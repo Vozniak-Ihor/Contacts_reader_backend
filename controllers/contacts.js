@@ -3,7 +3,7 @@ const { HttpError, ctrlWrapper } = require("../helpers");
 
 const allContacts = async (req, res) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit, favorite } = req.query;
+  const { page = 1, limit=1000, favorite } = req.query;
   const skip = (page - 1) * limit;
 
   if (favorite === "true") {

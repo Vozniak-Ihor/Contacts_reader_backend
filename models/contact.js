@@ -37,10 +37,10 @@ const addSchema = Joi.object({
     "string.empty": `name cannot be an empty field`,
     "any.required": `name is a required field`,
   }),
-  email: Joi.string().email().required().messages({
+  email: Joi.string().email().messages({
     "string.base": `email should be a type of 'text'`,
     "string.empty": `email cannot be an empty field`,
-    "any.required": `email is a required field`,
+    // "any.required": `email is a required field`,
   }),
   phone: Joi.string().required().messages({
     "string.base": `phone should be a type of 'text'`,
