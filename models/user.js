@@ -45,7 +45,7 @@ const registerSchema = Joi.object({
     "string.empty": `email cannot be an empty field`,
     "any.required": `email is a required field`,
   }),
-  password: Joi.string().min(6).required().messages({
+  password: Joi.string().required().messages({
     "string.base": `password should be a type of 'text'`,
     "string.empty": `password cannot be an empty field`,
     "any.required": `password is a required field`,

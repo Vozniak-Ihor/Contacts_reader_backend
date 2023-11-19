@@ -52,45 +52,45 @@ const register = async (req, res) => {
   });
 };
 
-const verifyEmail = async (req, res) => {
-  const { verificationToken } = req.params;
-  const user = await User.findOne({ verificationToken });
-  if (!user) {
-    throw HttpError(404, "User not found");
-  }
+// const verifyEmail = async (req, res) => {
+//   const { verificationToken } = req.params;
+//   const user = await User.findOne({ verificationToken });
+//   if (!user) {
+//     throw HttpError(404, "User not found");
+//   }
 
-  await User.findByIdAndUpdate(user._id, {
-    verify: true,
-    verificationToken: null,
-  });
+//   await User.findByIdAndUpdate(user._id, {
+//     verify: true,
+//     verificationToken: null,
+//   });
 
-  res.status(200).json({
-    message: "Verification successful",
-  });
-};
+//   res.status(200).json({
+//     message: "Verification successful",
+//   });
+// };
 
-const resendVerifyEmail = async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) {
-    throw HttpError(404, "Email not found");
-  }
-  if (user.verify) {
-    throw HttpError(400, "Verification has already been passed");
-  }
+// const resendVerifyEmail = async (req, res) => {
+//   const { email } = req.body;
+//   const user = await User.findOne({ email });
+//   if (!user) {
+//     throw HttpError(404, "Email not found");
+//   }
+//   if (user.verify) {
+//     throw HttpError(400, "Verification has already been passed");
+//   }
 
-  const varificationEmail = {
-    to: email,
-    subject: "Verify your email",
-    html: `<a target='_blank' href='${BASE_URL}/users/verify/${user.verificationToken}'>Click</a>`,
-  };
+//   const varificationEmail = {
+//     to: email,
+//     subject: "Verify your email",
+//     html: `<a target='_blank' href='${BASE_URL}/users/verify/${user.verificationToken}'>Click</a>`,
+//   };
 
-  await sendEmail(varificationEmail);
+//   await sendEmail(varificationEmail);
 
-  res.status(201).json({
-    message: "Verification email sent",
-  });
-};
+//   res.status(201).json({
+//     message: "Verification email sent",
+//   });
+// };
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -99,9 +99,9 @@ const login = async (req, res) => {
     throw HttpError(401, "Email or password is wrong");
   }
 
-  if (!user.verify) {
-    throw HttpError(401, "Email not verifying");
-  }
+  // if (!user.verify) {
+  //   throw HttpError(401, "Email not verifying");
+  // }
 
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
@@ -167,8 +167,8 @@ const getAvatar = async (req, res) => {
 
 module.exports = {
   register: ctrlWrapper(register),
-  verifyEmail: ctrlWrapper(verifyEmail),
-  resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
+  // verifyEmail: ctrlWrapper(verifyEmail),
+  // resendVerifyEmail: ctrlWrapper(resendVerifyEmail),
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),

@@ -3,16 +3,16 @@ const router = express.Router();
 const ctrl = require("../../controllers/user");
 const {
   validateSchema,
-  validateSchemaVerify,
+  // validateSchemaVerify,
 } = require("../../middlewares/validateSchemaJoi");
 const { authenticate, upload } = require("../../middlewares/");
 const { schemas } = require("../../models/user");
 
 router.post("/register", validateSchema(schemas.registerSchema), ctrl.register);
 
-router.get("/verify/:verificationToken", ctrl.verifyEmail);
+// router.get("/verify/:verificationToken", ctrl.verifyEmail);
 
-router.post("/verify",  validateSchemaVerify(schemas.emailSchema), ctrl.resendVerifyEmail);
+// router.post("/verify",  validateSchemaVerify(schemas.emailSchema), ctrl.resendVerifyEmail);
 
 router.post("/login", validateSchema(schemas.loginSchema), ctrl.login);
 
